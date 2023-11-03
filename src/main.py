@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
+from fastapi.middleware.cors import CORSMiddleware
 from redis import asyncio as aioredis
 
 from src.auth.base_config import auth_backend, fastapi_users
@@ -28,8 +29,21 @@ app.include_router(router_operation)
 app.include_router(router_operation)
 app.include_router(router_tasks)
 
+origins = [
+    'http://localhost:8000',
+]
 
-@app.on_event("startup")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=['GET', 'POST', 'DELETE', 'OPTIONS', 'PATCH', 'PUT'],
+    allow_headers=['Content-Type', 'Set-Cookie', 'Access-Control-Allow-Headers', 'Access-Control-Allow-Origin',
+                   'Authorization'],
+)
+
+
+@app.on_event('startup')
 async def startup():
-    redis = aioredis.from_url("redis://localhost")
-    FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
+    redis = aioredis.from_url('redis://localhost')
+    FastAPICache.init(RedisBackend(redis), prefix='fastapi-cache')

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Request, Depends
 from fastapi.templating import Jinja2Templates
 
+from src.auth.base_config import current_user
 from src.operations.router import get_specific_operations
 
 router = APIRouter(
@@ -11,7 +12,11 @@ router = APIRouter(
 templates = Jinja2Templates(directory='src/templates')
 
 
-# @router.get('/search')
 @router.get('/search/{operation_type}')
 def get_search_page(request: Request, operations=Depends(get_specific_operations)):
     return templates.TemplateResponse('search.html', {'request': request, 'operations': operations['data']})
+
+
+@router.get('/chat')
+def get_chat_page(request: Request):
+    return templates.TemplateResponse('chat.html', {'request': request, 'client_id': current_user})
